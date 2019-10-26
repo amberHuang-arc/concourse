@@ -25,12 +25,16 @@ public class ConfigFilesGenerator {
     private Map<String, String> keywordsReplaceMap = new HashMap<>();
     private List<String> appendLinesList = new ArrayList<String>();
 
-    String fromFilePathStr;
+    String fromFilePathStr = "";
 
-    String toFilePathStr;
+    String toFilePathStr = "";
 
     public ConfigFilesGenerator(String fromFilePath, String toFilePath) {
         this.fromFilePathStr = fromFilePath;
+        this.toFilePathStr = toFilePath;
+    }
+
+    public ConfigFilesGenerator(String toFilePath) {
         this.toFilePathStr = toFilePath;
     }
 
@@ -39,20 +43,27 @@ public class ConfigFilesGenerator {
         Path tofilePath = Paths.get(toFilePathStr);
 
         try {
-            Stream<String> lines = Files.lines(fromfilePath, Charset.forName("UTF-8"));
-            System.out.println("read from file:" + fromfilePath);
-            List<String> replacedLine = null;
-            if (!keywordsReplaceMap.isEmpty()) {
-                replacedLine = lines.map(line -> replaceWords(line, keywordsReplaceMap)).collect(Collectors.toList());
-                if (!appendLinesList.isEmpty()) {
-                    replacedLine.addAll(appendLinesList);
+            if (!fromFilePathStr.isEmpty()) {
+                List<String> replacedLine = null;
+                Stream<String> lines = Files.lines(fromfilePath, Charset.forName("UTF-8"));
+                System.out.println("read from file:" + fromfilePath);
+
+                if (!keywordsReplaceMap.isEmpty()) {
+                    replacedLine = lines.map(line -> replaceWords(line, keywordsReplaceMap)).collect(Collectors.toList());
+                    if (!appendLinesList.isEmpty()) {
+                        replacedLine.addAll(appendLinesList);
+                    }
+                } else {
+                    replacedLine = appendLinesList;
                 }
-            } else {
-                replacedLine = appendLinesList;
+                Files.write(tofilePath, replacedLine, Charset.forName("UTF-8"));
+                lines.close();
+            } else {  // no from file
+                Files.write(tofilePath, appendLinesList, Charset.forName("UTF-8"));
             }
-            Files.write(tofilePath, replacedLine, Charset.forName("UTF-8"));
+
             System.out.println("write to file:" + toFilePathStr);
-            lines.close();
+
             System.out.println("Done");
         } catch (IOException e) {
             e.printStackTrace();

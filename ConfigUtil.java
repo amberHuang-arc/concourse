@@ -16,16 +16,10 @@ import static javaapplication1.JavaApplication1.configDevice;
  */
 public class ConfigUtil {
 
-    public static final String ROOT_FROM_FILE_PATH = "/Users/amberh3/dev/myscript/";
-    public static final String ROOT_TO_FILE_PATH = "/Users/amberh3/dev/myscript/out/";
+    public static final String ROOT_TO_FILE_PATH
+            = System.getProperty("user.home") + File.separator + "packetTracer" + File.separator;
 
     static {
-        File fromdir = new File(ROOT_FROM_FILE_PATH);
-        if (!fromdir.exists()) {
-            System.out.println("make dir: " + ROOT_FROM_FILE_PATH);
-            fromdir.mkdir();
-        }
-        
         File todir = new File(ROOT_TO_FILE_PATH);
         if (!todir.exists()) {
             System.out.println("make dir: " + ROOT_TO_FILE_PATH);
@@ -34,36 +28,38 @@ public class ConfigUtil {
     }
 
     static void configPC(Scanner in) {
+        /*
+        IP Address: $ip$
+        Subnet Mask: $subnet_mask$
+        Default Gateway: $ip_default_gateway$
+        DNS Server: ip (optional)      
+         */
         System.out.println("input hostname: ");
         String hostNameStr = in.nextLine();
         System.out.println("---hostname: " + hostNameStr);
+        String toFileName = hostNameStr + ".txt";
+        String toFile = ROOT_TO_FILE_PATH + toFileName;
+
+        //build the replacement keywords map, then process replacement
+        ConfigFilesGenerator helper = new ConfigFilesGenerator(toFile);
+        List<String> appendlineList = helper.getAppendLinesList();
 
         System.out.println("input pc ip");
         String ipStr = in.nextLine();
         System.out.println("---pc ip: " + ipStr);
+        appendlineList.add("IP Address: " + ipStr);
 
         System.out.println("input subnet mask: ");
         String subnetMaskStr = in.nextLine();
         System.out.println("---subnet mask:" + subnetMaskStr);
+        appendlineList.add("Subnet Mask: " + subnetMaskStr);
 
         System.out.println("input default gateway: ");
         String defaultGatewayStr = in.nextLine();
         System.out.println("---default gateway:" + defaultGatewayStr);
+        appendlineList.add("Default Gateway: " + defaultGatewayStr);
 
-        String toFileName = hostNameStr + ".txt";
-        String fromFile = ROOT_FROM_FILE_PATH + "pc.conf";
-        String toFile = ROOT_TO_FILE_PATH + toFileName;
-
-        //build the replacement keywords map, then process replacement
-        ConfigFilesGenerator helper = new ConfigFilesGenerator(fromFile, toFile);
-        Map<String, String> keywordsReplaceMap = helper.getKeywordsReplaceMap();
-        keywordsReplaceMap.put("$ip$", ipStr);
-        keywordsReplaceMap.put("$subnet_mask$", subnetMaskStr);
-        keywordsReplaceMap.put("$ip_default_gateway$", defaultGatewayStr);
-
-        List<String> appendlineList = helper.getAppendLinesList();
-
-        System.out.println("DNS server ip? ");
+        System.out.println("DNS server ip? if no, just enter");
         String dnsIpStr = in.nextLine();
         if (!dnsIpStr.isEmpty()) {
             System.out.println("---DNS server ip: " + dnsIpStr);
@@ -74,8 +70,8 @@ public class ConfigUtil {
         helper.generateConfigFile();
 
     }
-    
-    static void configSwitch(Scanner in){
+
+    static void configSwitch(Scanner in) {
         SwitchConfigUtil.configSwitch(in);
     }
 
