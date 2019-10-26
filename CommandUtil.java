@@ -177,14 +177,16 @@ public class CommandUtil {
         appendlineList.add("switchport trunk allowed vlan " + vlanNoStr);
     }
 
-    //switchport trunk native vlan [native vlan number](optional)
+    //switchport trunk native vlan [native vlan number](default 1)
     static void doTrunkNativeVlanConfig(Scanner in, List<String> appendlineList) {
         System.out.println("input native vlan number(optional): if no, just enter");
         String nativeVlanNoStr = in.nextLine();
-        if (!nativeVlanNoStr.isEmpty()) {
-            System.out.println("---native vlan no:" + nativeVlanNoStr);
-            appendlineList.add("switchport trunk native vlan " + nativeVlanNoStr);
+
+        if (nativeVlanNoStr.isEmpty()) {
+            nativeVlanNoStr = "1";
         }
+        System.out.println("---trunk native vlan no:" + nativeVlanNoStr);
+        appendlineList.add("switchport trunk native vlan " + nativeVlanNoStr);
     }
 
     //name [vlan name]
